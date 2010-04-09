@@ -1,0 +1,111 @@
+data = read.table("sample_user.csv", header=TRUE, sep=",")
+#convert when to date objects
+EST=as.Date(data$when,format("%a %b %d %H:%M:%S EST %Y"))
+EDT=as.Date(data$when,format("%a %b %d %H:%M:%S EDT %Y"))
+EST[is.na(EST)]=EDT[is.na(EST)]
+dates=EST
+data$date = dates
+
+uid = "6617175564718198A"
+bobid = "11326666288218198A"
+caroleid = "33651685167798A"
+danid = "1114331986687698A"
+edenid = "1962289198A79798A"
+frankid = "28577267294898A"
+str(data)
+
+tsend=table(data$senderid)
+trec = table(data$receiverid)
+
+#number of people where who got replies
+length(intersect(names(tsend),names(trec)))
+
+#sort frame by message length to see who got the longest messages
+sorted=data[order(data$msglength, decreasing=TRUE),]
+
+# #sent messages by user
+usersent <- data[data$senderid == uid,]
+sortedUserSent = usersent[order(usersent$msglength, decreasing=TRUE),]
+# user received messages
+userrec <- data[data$senderid != uid,]
+sortedUserRec = userrec[order(userrec$msglength, decreasing=TRUE),]
+#a plot of number of sent and received messages for alice
+## plot(table(cut(userrec$date,breaks="week")),type="l",col="Blue", xlab="Weeks",ylab="# of Messages", lty=2)
+## points(table(cut(usersent$date,breaks="week")), col="Red",type="l")
+## legend(40,20,c("Received", "Sent"), col=c("Blue","Red"),lty=c(2,1))
+## title("Number of messages sent and received by 6617175564718198A")
+
+#plot messages by user
+plotPerson = function(user, color, marker)
+  {
+    udata = data[((data$senderid == user) | (data$receiverid == user)),]
+    points(udata$date, udata$msglength, col=color, pch=marker)
+  }
+plot(usersent$date, usersent$msglength, col="red", pch=4, xlab="Time", ylab="Message Length")
+plotPerson(bobid, "blue", 0)
+plotPerson(caroleid, "green", 1)
+plotPerson(danid, "magenta", 11)
+plotPerson(edenid, "yellow", 2)
+plotPerson(frankid, "black", 6)
+#legend(locator(1),locator(1),c("Received", "Sent"), col=c("Blue","Red"),lty=c(2,1))
+legend(locator(1),locator(1),c("Sent by Alice", "Bob", "Carl", "Dan", "Ed","Frank"), col=c("Red","Blue","Green","Magenta","Yellow","Black"),pch=c(4,0,1,11,2,6))
+
+#bob,carole,dan data frame
+## bobdata = data[((data$senderid == bobid) | (data$receiverid == bobid)),]
+## caroledata = data[((data$senderid == caroleid) | (data$receiverid == caroleid)),]
+## dandata = data[((data$senderid == danid) | (data$receiverid == danid)),]
+## #plot data over time 
+## plot(data$date, data$msglength)
+## #color Bob points red
+## points(bobdata$date, bobdata$msglength, col="Blue", pch=0)
+## points(caroledata$date, caroledata$msglength, col="Red", pch=2)
+## points(dandata$date, dandata$msglength, col="Green", pch=3)
+## points(usersent$date, usersent$msglength, col="Magenta", pch=5)
+## #distribution of messages over receivers
+## barchart(table(usersent$receiverid))
+## #messages sent over time
+## plot(usersent$date, usersent$msglength)
+
+
+## #user sent more or received more?
+## usent <- length(data$senderid[data$senderid == uid])
+## urec <- length(data$receiverid[data$receiverid == uid])
+## #received messages by user
+## userrec <- data[data$senderid != uid,]
+## plot(userrec$date, userrec$msglength)
+
+## #messages over time (blue is sent, red is received)
+
+
+## plot(usersent$date, usersent$msglength, col="blue")
+## axis.Date(1, at=seq(as.Date("2008/10/17"), max(usersent$date)+6, "weeks"))
+## points(userrec$date, userrec$msglength, col="red")
+## ###############################################
+## t=tapply(X=usersent$msglength, INDEX=list(usersent$receiverid),FUN=sum)
+
+## b=by(usersent[,c("msglength")], INDICES=list(usersent$receiverid),FUN=sum)
+## a=aggregate(x=usersent[,c("msglength")], by=list(usersent$receiverid),FUN=sum)
+
+## #significant users (msglength over 500)
+
+## ## #filter out extreme heights)
+## ## d <- data[data$height>56,]
+## ## d <- d[d$height<247,]
+## ## #filter out anyone underage
+## ## d <- d[d$age>=18,]
+## ## # cut out .001 .999
+## ## e <- d[d$height<221.1855,]
+## ## e <- d[d$height>91.4580,]
+## ## #cut out .01, .99
+## ## c <- d[d$height>160.0515,]
+## ## c <- c[c$height<214.4860,]
+## ## # cut out .25 .75
+## ## q <- e[e$height>175.2945,]
+## ## q <- q[q$height<185.4564,]
+## ## cor(e$age, e$height, use = "everything", method=c("pearson","kendall","spearman"))
+
+
+## ## d <- d[d$height<247,]
+## ## d <- d[d$height>56,]
+
+

@@ -1,0 +1,7 @@
+rectangleNum = 5
+rectangles = []
+
+def findRectangles(users):
+    if len(rectangles) >= rectangleNum:
+        return rectangles
+

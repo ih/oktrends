@@ -14,42 +14,68 @@ edenid = "1962289198A79798A"
 frankid = "28577267294898A"
 str(data)
 
-tsend=table(data$senderid)
-trec = table(data$receiverid)
-
+tsend=sort(table(data$senderid),decreasing=TRUE)
+trec = sort(table(data$receiverid),decreasing=TRUE)
 #number of people where who got replies
 length(intersect(names(tsend),names(trec)))
+#data frame with number of messages sent and received indexed by user
+dsend=data.frame(tsend)
+drec=data.frame(trec)          
+          interact=merge(dsend,drec, by="Var1")          
+interact=interact[order(interact$Freq.x,decreasing=TRUE),]
+interact$Var1=intersect(names(tsend),names(trec))
+#barchart of interactions
+barplot(t(data.matrix(interact))[2:3,2:17],beside=TRUE,xlab="users",ylab="# of messages", names.arg=substring(interact$Var1[2:17],1,4),las=2,col=c("red","blue"))
 
+legend("topright",c("Sent","Received"), col=c("Red","Blue"), lty=1)
+title("Number of interactions with other users")
 #sort frame by message length to see who got the longest messages
 sorted=data[order(data$msglength, decreasing=TRUE),]
 
 # #sent messages by user
 usersent <- data[data$senderid == uid,]
 sortedUserSent = usersent[order(usersent$msglength, decreasing=TRUE),]
+#histogram of user sent messages
+plot(sort(table(usersent$receiverid),decreasing=TRUE)[1:10], xaxt="n",xlab="users",ylab="# of messages",t='h',lwd=20)
+axis(1,at=1:10,labels=substring(names(sort(table(usersent$receiverid),decreasing=TRUE)[1:10]),1,4),las=2)
+title("Top 10 users who received most messages")
+
+plot(sort(table(usersent$receiverid),decreasing=TRUE)[1:10], xaxt="n",xlab="users",ylab="# of messages",t='h',lwd=20)
 # user received messages
 userrec <- data[data$senderid != uid,]
 sortedUserRec = userrec[order(userrec$msglength, decreasing=TRUE),]
+#histogram of user received messages
+plot(sort(table(userrec$senderid),decreasing=TRUE)[1:10], xaxt="n",xlab="users",ylab="# of messages",t='h',lwd=20)
+axis(1,at=1:10,labels=substring(names(sort(table(userrec$senderid),decreasing=TRUE)[1:10]),1,4),las=2)
+title("Top 10 users who sent the most messages")
+
+
 #a plot of number of sent and received messages for alice
-plot(table(cut(userrec$date,breaks="week")),type="l",col="Blue", xlab="Weeks",ylab="# of Messages", lty=2)
+plot(table(cut(userrec$date,breaks="week")),type="l",col="Blue", xlab="Weeks",ylab="# of Messages", lty=1)
 points(table(cut(usersent$date,breaks="week")), col="Red",type="l")
 points(table(cut(usersent$date,breaks="week")), col="Red",type="h")
-legend("topright",c("Received", "Sent"), col=c("Blue","Red"),lty=c(2,1))
-title("Number of messages sent and received by Alice")
+legend("topright",c("Sent","Received"), col=c("Red","Blue"),lty=c(1,1))
+title("Number of messages sent and received by 6617")
+
+
+
 
 #plot messages by user
+poi=names(trec[1:6])
 plotPerson = function(user, color, marker)
   {
     udata = data[((data$senderid == user) | (data$receiverid == user)),]
     points(udata$date, udata$msglength, col=color, pch=marker)
   }
-plot(usersent$date, usersent$msglength, col="red", pch=4, xlab="Time", ylab="Message Length")
-plotPerson(bobid, "blue", 0)
-plotPerson(caroleid, "green", 1)
-plotPerson(danid, "magenta", 11)
-plotPerson(edenid, "yellow", 2)
-plotPerson(frankid, "black", 6)
-legend("topright",c("Alice", "Bob", "Carl", "Dana", "Ed", "Frank"), col=c("Red","Blue","Green","Magenta","Yellow","Black"),pch=c(4,0,1,11,2,6))
-title("Messages by user")
+plot(usersent$date, usersent$msglength, col="black", pch=4, xlab="Time", ylab="Message Length")
+plotPerson(poi[2], "blue", 0)
+plotPerson(poi[3], "green", 1)
+plotPerson(poi[4], "magenta", 11)
+plotPerson(poi[5], "yellow", 2)
+plotPerson(poi[6], "red", 6)
+legend("topright",substring(poi,1,4), col=c("black","Blue","Green","Magenta","Yellow","red"),pch=c(4,0,1,11,2,6))
+title("Messages sent by 6617 and top 5 receivers messages (sent/received)")
+
 #bob,carole,dan data frame
 ## bobdata = data[((data$senderid == bobid) | (data$receiverid == bobid)),]
 ## caroledata = data[((data$senderid == caroleid) | (data$receiverid == caroleid)),]

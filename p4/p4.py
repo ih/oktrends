@@ -1,5 +1,26 @@
+from sqlalchemy import create_engine
 from Queue import PriorityQueue
 import pdb
+
+#get all data from the database
+
+def preprocess():
+    engine = create_engine('mysql://root:password@localhost/first')
+    connection=engine.connect()
+    data=connection.execute("select * from usr_locations")
+    west=Rectangle(Coord(90,-180),Coord(-90,0))
+    east=Rectangle(Coord(90,0),Coord(-90,180))
+    for row in data:
+        u=User(row[0],row[1],row[2])
+        if u.pos.lon<=0:
+            west.addUser(u)
+        else:
+            east.addUser(u)
+    rq=RectangleQueue()
+    rq.put(east)
+    rq.put(west)
+    return rq
+
 rectangleNum = 3
 rectangles = []
 areaLimit = 300

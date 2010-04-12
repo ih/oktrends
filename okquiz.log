@@ -1,0 +1,122 @@
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2010.3.23)  12 APR 2010 10:45
+entering extended mode
+ %&-line parsing enabled.
+**\input okquiz.tex
+(./okquiz.tex (/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size12.clo
+File: size12.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2007/01/08 v0.04d Graphics/color for pdfTeX
+\Gread@gobject=\count87
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+) (./okquiz.aux)
+\openout1 = `okquiz.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+Missing character: There is no â in font cmti12!
+Missing character: There is no € in font cmti12!
+Missing character: There is no ™ in font cmti12!
+
+<p2/nummess.pdf, id=1, 505.89pt x 505.89pt>
+File: p2/nummess.pdf Graphic file (type pdf)
+ <use p2/nummess.pdf>
+Overfull \hbox (12.26353pt too wide) in paragraph at lines 16--19
+[] \OT1/cmr/m/n/12 Our
+ []
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+<p2/interact.pdf, id=9, 505.89pt x 505.89pt>
+File: p2/interact.pdf Graphic file (type pdf)
+ <use p2/interact.pdf>
+Overfull \hbox (12.26353pt too wide) in paragraph at lines 20--23
+[] \OT1/cmr/m/n/12 The
+ []
+
+[2 <./p2/nummess.pdf>] <p2/usermess.pdf, id=18, 505.89pt x 505.89pt>
+File: p2/usermess.pdf Graphic file (type pdf)
+
+<use p2/usermess.pdf>
+Overfull \hbox (7.04137pt too wide) in paragraph at lines 24--25
+[][] 
+ []
+
+[3 <./p2/interact.pdf>] [4 <./p2/usermess.pdf>]
+Missing character: There is no â in font cmti12!
+Missing character: There is no € in font cmti12!
+Missing character: There is no ™ in font cmti12!
+Missing character: There is no â in font cmti12!
+Missing character: There is no € in font cmti12!
+Missing character: There is no ™ in font cmti12!
+ [5]
+<p3/height.pdf, id=39, 505.89pt x 505.89pt>
+File: p3/height.pdf Graphic file (type pdf)
+ <use p3/height.pdf>
+Overfull \hbox (32.33736pt too wide) in paragraph at lines 41--42
+[][] 
+ []
+
+[6 <./p3/height.pdf>] (./okquiz.aux) ) 
+Here is how much of TeX's memory you used:
+ 584 strings out of 95087
+ 7029 string characters out of 1183278
+ 57161 words of memory out of 1500000
+ 3811 multiletter control sequences out of 10000+50000
+ 4891 words of font info for 18 fonts, out of 1200000 for 2000
+ 28 hyphenation exceptions out of 8191
+ 25i,5n,21p,1740b,107s stack positions out of 5000i,500n,6000p,200000b,5000s
+</usr/share/texmf-texlive/fonts/type1/blu
+esky/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmr12.pfb><
+/usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmti12.pfb>
+Output written on okquiz.pdf (6 pages, 75148 bytes).
+PDF statistics:
+ 58 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
+

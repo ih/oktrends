@@ -3,11 +3,11 @@ from sqlalchemy import create_engine
 from Queue import PriorityQueue
 import pdb
 
-rectangleNum = 3
+rectangleNum = 5
 rectangles = []
-areaLimit = 300
-
-
+areaLimit = 100 #square miles
+meshSize = 1 #square miles
+seedLimit = areaLimit/meshSize #the most number of seeds one might need
 def preprocess(dbuser,dbpass):
     s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
 #    engine = create_engine('mysql://'+dbuser+':'+dbpass+'+@localhost/first')
@@ -27,13 +27,34 @@ def preprocess(dbuser,dbpass):
     rq.put(west)
     return rq
 
+def findRectangles(dbuser,dbpass):
+    #find squares with area meshSize that are most populated
+    seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
+    while len(rectangles) < rectangleNum and seeds:
+        # mostPopulated=popMostPopulated(seeds) 
+        seed=popMostPopulated(seeds)
+        growthQueue=UniqueRectangleQueue()
+        growQueue.put(seed)
+        # hypRec is our hypothesis rectangle that grows to cover the most populated seeds
+        hypRec = copy(seed) 
+        while area(hypRec)<areaLimit and growthQueue:
+            mostPopulated = growthQueue.get()
+            for neighbor in neighbors(mostPopulated):
+                try: 
+                    seeds.remove(neighbor)
+                except ValueError:
+                    None
+                growthQueue.put(neighbor)
+            hypRec.extendRectangle(mostPopulated)
+        rectangles.append(hypRec)
 
-def findRectangles(rectangleQueue):
-    """finds a set of rectangles that hopefully contain the most number of people"""
-    while len(rectangles) < rectangleNum and not rectangleQueue.empty():
+def findSeeds(rectangleQueue):
+    """return most populated squares of size dependent on mesh_size"""
+    seeds = []
+    while len(seeds) < seedLimit and not rectangleQueue.empty():
         mostPopulated = rectangleQueue.get()
-        if area(mostPopulated) <= areaLimit:
-            rectangles.append(mostPopulated)
+        if area(mostPopulated) <= meshSize:
+            seeds.append(mostPopulated)
         else:
             newRectangles = divide(mostPopulated)
             for user in mostPopulated.users:
@@ -43,7 +64,7 @@ def findRectangles(rectangleQueue):
                 if rectangle.popSize()>0:
                     rectangleQueue.put(rectangle)
 #        pdb.set_trace()
-    return rectangles
+    return seeds
 
 def divide(rectangle):
     """returns a set of subrectangles of rectangle"""
@@ -51,8 +72,8 @@ def divide(rectangle):
     x = rectangle.nw.lon
     b = rectangle.se.lat
     a = rectangle.se.lon
-    midh = ((y-b)/2)+b
-    midw = ((a-x)/2)+x
+    midh = ((y-b)/2.0)+b
+    midw = ((a-x)/2.0)+x
     r1=Rectangle(rectangle.nw, Coord(lat=midh,lon=midw))
     r2=Rectangle(Coord(y,midw), Coord(midh,a))
     r3=Rectangle(Coord(midh,midw), rectangle.se)
@@ -67,6 +88,9 @@ def assign(user, disjointRectangles):
 
 def isIn(user,rectangle):
     return user.pos.lat<=rectangle.nw.lat and user.pos.lat>rectangle.se.lat and user.pos.lon <= rectangle.se.lon and user.pos.lon > rectangle.nw.lon
+
+class UniqueRectangleQueue():
+    """A priority queue for rectangles that can only have a rectangle """
 
 class RectangleQueue(PriorityQueue):
     def put(self,rectangle):
@@ -108,12 +132,12 @@ class User:
         return str(self.userid)+":"+str(self.pos)
 
 #get all data from the database
-dbuser, dbpass = sys.argv[1],sys.argv[2]
-ans = findRectangles(preprocess(dbuser,dbpass))
-for r in ans:
-    print r
-    for user in r.users:
-        print user
+# dbuser, dbpass = sys.argv[1],sys.argv[2]
+# ans = findRectangles(preprocess(dbuser,dbpass))
+# for r in ans:
+#     print r
+#     for user in r.users:
+#         print user
 
 
 

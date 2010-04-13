@@ -3,10 +3,9 @@ from sqlalchemy import create_engine
 from Queue import PriorityQueue
 import pdb
 
-rectangleNum = 3
+rectangleNum = 5
 rectangles = []
-areaLimit = 300
-
+areaLimit = 100
 
 def preprocess(dbuser,dbpass):
     s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
@@ -26,7 +25,6 @@ def preprocess(dbuser,dbpass):
     rq.put(east)
     rq.put(west)
     return rq
-
 
 def findRectangles(rectangleQueue):
     """finds a set of rectangles that hopefully contain the most number of people"""

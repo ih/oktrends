@@ -4,12 +4,20 @@ from Queue import PriorityQueue
 from copy import copy
 import pdb
 
+northLimit=4
+southLimit=0
+eastLimit=5
+westLimit=0
 rectangleNum = 2
-rectangles = []
-areaLimit = 10 #square miles
+
+areaLimit = 2 #square miles
 meshSize = 1 #square miles
 seedLimit = areaLimit/meshSize #the most number of seeds one might need
 allUsers = []
+
+def test(users):
+    global allUsers
+    allUsers=users
 
 def preprocess(dbuser,dbpass):
     s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
@@ -17,8 +25,8 @@ def preprocess(dbuser,dbpass):
     engine = create_engine(s)
     connection=engine.connect()
     data=connection.execute("select * from usr_locations")
-    west=Rectangle(Coord(90,-180),Coord(-90,0))
-    east=Rectangle(Coord(90,0),Coord(-90,180))
+    west=Rectangle(Coord(northLimit,westLimit),Coord(southLimit,0))
+    east=Rectangle(Coord(northLimit,0),Coord(southLimit,northLimit))
     for row in data:
         u=User(row[0],row[1],row[2])
         allUsers.append(u) #change this to insert user into two lists sorted by lat and lon; eventually used in populate
@@ -34,23 +42,30 @@ def preprocess(dbuser,dbpass):
 def growRectangles(seeds):
     #find squares with area meshSize that are most populated
 #    seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
+    rectangles = []
+    pdb.set_trace()
     while len(rectangles) < rectangleNum and seeds:
-        # mostPopulated=popMostPopulated(seeds) 
+        # mostPopulated=popMostPopulated(seeds)
+
         seed=seeds.pop(0)
-        growthQueue=UniqueRectangleQueue()
-        growthQueue.put(seed)
-        # hypRec is our hypothesis rectangle that gets extended to cover the most populated neighboring squares
-        hypRec = copy(seed) 
-        while area(hypRec)<areaLimit and growthQueue:
-            mostPopulated = growthQueue.get()
-            for neighbor in neighbors(mostPopulated):
-                try: 
-                    seeds.remove(neighbor) #populating neighbors can be optimized by using the already populated seeds if the seed is a neighbor
-                except ValueError:
-                    None
-                growthQueue.put(neighbor)
-            hypRec.extendRectangle(mostPopulated)
+        if not intersects(seed,rectangles):
+            growthQueue=UniqueRectangleQueue()#change this to clear the queue instead of creating a new one?
+            growthQueue.put(seed)
+            # hypRec is our ectangle that gets extended to cover the most populated neighboring squares
+            hypRec = copy(seed) 
+            while area(hypRec)<areaLimit and growthQueue:
+                mostPopulated = growthQueue.get()
+                #make sure hypRec didn't cover up neighbors placed in growthQueue
+                if not intersects(mostPopulated, [hypRec]): 
+                #check if extending the hypothesis rectangle would intersect anything in rectangles
+                    testExpand=Rectangle(hypRec.nw,hypRec.se)
+                    testExpand.extendRectangle(mostPopulated)
+                    if not intersects(testExpand, rectangles):
+                        hypRec.extendRectangle(mostPopulated)
+                        #only add neighbors of mostPopulated if the hypothesis was extended
+                        [growthQueue.put(neighbor) for neighbor in neighbors(mostPopulated) if not intersects(neighbor, rectangles)]
         rectangles.append(hypRec)
+    return rectangles
 
 def populate(rectangle,population):
     #highly inefficient (can be improved by using two lists of users sorted by lat and lon respectively
@@ -58,6 +73,7 @@ def populate(rectangle,population):
         assign(user, [rectangle])
 
 def neighbors(rectangle):
+#    pdb.set_trace()
     """return neighboring rectangles with the users who exist in them"""
     assert area(rectangle) <= meshSize
     ns = [north(rectangle),west(rectangle),east(rectangle),south(rectangle)]
@@ -65,37 +81,37 @@ def neighbors(rectangle):
     return ns
 
 def north(rectangle):
-    if rectangle.nw.lat+rectangle.height <= 90:
+    if rectangle.nw.lat+rectangle.height <= northLimit:
         nw=Coord(rectangle.nw.lat+rectangle.height, rectangle.nw.lon)
         se=Coord(rectangle.nw.lat, rectangle.se.lon)
         return Rectangle(nw,se)
     else:
-        assert rectangle.nw.lat == 90
-        assert False, rectangle
+        assert rectangle.nw.lat == northLimit
+        return rectangle
 def west(rectangle):
-    if rectangle.nw.lon-rectangle.width >= -180:
+    if rectangle.nw.lon-rectangle.width >= westLimit:
         nw=Coord(rectangle.nw.lat, rectangle.nw.lon-rectangle.width)
         se=Coord(rectangle.se.lat, rectangle.nw.lon)
         return Rectangle(nw,se)
     else:
-        assert rectangle.nw.lon == -180
-        assert False
+        assert rectangle.nw.lon == westLimit
+        return rectangle
 def east(rectangle):
-    if rectangle.se.lon+rectangle.width <= 180:
+    if rectangle.se.lon+rectangle.width <= eastLimit:
         nw=Coord(rectangle.nw.lat, rectangle.se.lon)
         se=Coord(rectangle.se.lat, rectangle.se.lon+rectangle.width)
         return Rectangle(nw,se)
     else:
-        assert rectangle.se.lon == 180
-        assert False
+        assert rectangle.se.lon == eastLimit
+        return rectangle 
 def south(rectangle):
-    if rectangle.se.lat-rectangle.height >= -90:
+    if rectangle.se.lat-rectangle.height >= southLimit:
         nw=Coord(rectangle.se.lat, rectangle.nw.lon)
         se=Coord(rectangle.se.lat-rectangle.height, rectangle.se.lon)
         return Rectangle(nw,se)
     else:
-        assert rectangle.se.lat == -90
-        assert False
+        assert rectangle.se.lat == southLimit
+        return rectangle
 
 def findSeeds(rectangleQueue):
     """return most populated squares of size dependent on mesh_size"""
@@ -180,8 +196,8 @@ class Rectangle:
     def popSize(self):
         return len(self.users)
     def extendRectangle(self, expansion):
+        #assumes expansion is a rectangle that borders the current rectanlge
         #this can eventually be rewritten to draw diagonal rectangles
-        #need to add cases for when an expansion crosses a border, might make things easier to work on 0-360 and 0-180 for long an lat
         if expansion.nw.lat > self.nw.lat:
             self.nw.lat = expansion.nw.lat
         elif expansion.nw.lon < self.nw.lon:
@@ -192,6 +208,7 @@ class Rectangle:
             self.se.lat = expansion.se.lat
         else:
             None
+            #extend over northern border
 #            pdb.set_trace()
 #            assert (self == expansion), (str(self)+' '+str(expansion))
 

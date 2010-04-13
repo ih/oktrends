@@ -30,6 +30,9 @@ def preprocess(dbuser,dbpass):
 
 def findRectangles(rectangleQueue):
     """finds a set of rectangles that hopefully contain the most number of people"""
+
+def findMostPopulated(rectangleQueue):
+    """finds a set of squares that hopefully contain the most number of people"""
     while len(rectangles) < rectangleNum and not rectangleQueue.empty():
         mostPopulated = rectangleQueue.get()
         if area(mostPopulated) <= areaLimit:
@@ -42,7 +45,7 @@ def findRectangles(rectangleQueue):
             for rectangle in newRectangles:
                 if rectangle.popSize()>0:
                     rectangleQueue.put(rectangle)
-#        pdb.set_trace()
+#            pdb.set_trace()
     return rectangles
 
 def divide(rectangle):
@@ -51,8 +54,8 @@ def divide(rectangle):
     x = rectangle.nw.lon
     b = rectangle.se.lat
     a = rectangle.se.lon
-    midh = ((y-b)/2)+b
-    midw = ((a-x)/2)+x
+    midh = ((y-b)/2.0)+b
+    midw = ((a-x)/2.0)+x
     r1=Rectangle(rectangle.nw, Coord(lat=midh,lon=midw))
     r2=Rectangle(Coord(y,midw), Coord(midh,a))
     r3=Rectangle(Coord(midh,midw), rectangle.se)
@@ -89,8 +92,8 @@ class Rectangle:
         return len(self.users)
 
 def area(rectangle):
-    length=rectangle.se.lon-rectangle.nw.lon
-    height=rectangle.nw.lat-rectangle.se.lat
+    length=(rectangle.se.lon-rectangle.nw.lon)*68.9722023
+    height=(rectangle.nw.lat-rectangle.se.lat)*68.9722023
     return length*height
 
 class Coord:

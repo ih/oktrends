@@ -4,12 +4,13 @@ from Queue import PriorityQueue
 from copy import copy
 import pdb
 
-rectangleNum = 5
+rectangleNum = 2
 rectangles = []
-areaLimit = 100 #square miles
+areaLimit = 10 #square miles
 meshSize = 1 #square miles
 seedLimit = areaLimit/meshSize #the most number of seeds one might need
 allUsers = []
+
 def preprocess(dbuser,dbpass):
     s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
 #    engine = create_engine('mysql://'+dbuser+':'+dbpass+'+@localhost/first')
@@ -30,9 +31,9 @@ def preprocess(dbuser,dbpass):
     rq.put(west)
     return rq
 
-def findRectangles(dbuser,dbpass):
+def growRectangles(seeds):
     #find squares with area meshSize that are most populated
-    seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
+#    seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
     while len(rectangles) < rectangleNum and seeds:
         # mostPopulated=popMostPopulated(seeds) 
         seed=seeds.pop(0)
@@ -58,7 +59,7 @@ def populate(rectangle,population):
 
 def neighbors(rectangle):
     """return neighboring rectangles with the users who exist in them"""
-    assert area(rectangle) == meshSize
+    assert area(rectangle) <= meshSize
     ns = [north(rectangle),west(rectangle),east(rectangle),south(rectangle)]
     [populate(n,allUsers) for n in ns]
     return ns
@@ -70,7 +71,7 @@ def north(rectangle):
         return Rectangle(nw,se)
     else:
         assert rectangle.nw.lat == 90
-        assert False
+        assert False, rectangle
 def west(rectangle):
     if rectangle.nw.lon-rectangle.width >= -180:
         nw=Coord(rectangle.nw.lat, rectangle.nw.lon-rectangle.width)
@@ -178,8 +179,21 @@ class Rectangle:
         self.users.append(user)
     def popSize(self):
         return len(self.users)
-    def extenRectangle(self, expansion):
-        case 
+    def extendRectangle(self, expansion):
+        #this can eventually be rewritten to draw diagonal rectangles
+        #need to add cases for when an expansion crosses a border, might make things easier to work on 0-360 and 0-180 for long an lat
+        if expansion.nw.lat > self.nw.lat:
+            self.nw.lat = expansion.nw.lat
+        elif expansion.nw.lon < self.nw.lon:
+            self.nw.lon = expansion.nw.lon
+        elif expansion.se.lon > self.se.lon:
+            self.se.lon = expansion.se.lon
+        elif expansion.se.lat < self.se.lat:
+            self.se.lat = expansion.se.lat
+        else:
+            None
+#            pdb.set_trace()
+#            assert (self == expansion), (str(self)+' '+str(expansion))
 
 def area(rectangle):
     return rectangle.height*rectangle.width

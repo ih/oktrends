@@ -27,6 +27,7 @@ def preprocess(dbuser,dbpass):
     rq.put(west)
     return rq
 
+
 def findRectangles(dbuser,dbpass):
     #find squares with area meshSize that are most populated
     seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
@@ -63,8 +64,10 @@ def findSeeds(rectangleQueue):
             for rectangle in newRectangles:
                 if rectangle.popSize()>0:
                     rectangleQueue.put(rectangle)
+
 #        pdb.set_trace()
     return seeds
+
 
 def divide(rectangle):
     """returns a set of subrectangles of rectangle"""
@@ -113,8 +116,8 @@ class Rectangle:
         return len(self.users)
 
 def area(rectangle):
-    length=rectangle.se.lon-rectangle.nw.lon
-    height=rectangle.nw.lat-rectangle.se.lat
+    length=(rectangle.se.lon-rectangle.nw.lon)*68.9722023
+    height=(rectangle.nw.lat-rectangle.se.lat)*68.9722023
     return length*height
 
 class Coord:

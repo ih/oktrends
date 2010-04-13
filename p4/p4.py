@@ -40,20 +40,16 @@ def preprocess(dbuser,dbpass):
     return rq
 
 def growRectangles(seeds):
-    #find squares with area meshSize that are most populated
-#    seeds = findSeeds(preprocess(dbuser,dbpass)) #a collection with a delete function
     rectangles = []
     pdb.set_trace()
     while len(rectangles) < rectangleNum and seeds:
-        # mostPopulated=popMostPopulated(seeds)
-
         seed=seeds.pop(0)
         if not intersects(seed,rectangles):
-            growthQueue=UniqueRectangleQueue()#change this to clear the queue instead of creating a new one?
-            growthQueue.put(seed)
-            # hypRec is our ectangle that gets extended to cover the most populated neighboring squares
+            # hypRec is the hypothesis rectangle that gets extended to cover the most populated neighboring squares
             hypRec = copy(seed) 
-            while area(hypRec)<areaLimit and growthQueue:
+            growthQueue=UniqueRectangleQueue()#change this to clear the queue instead of creating a new one?
+            [growthQueue.put(neighbor) for neighbor in neighbors(seed) if not intersects(neighbor, rectangles)]
+             while area(hypRec)<areaLimit and growthQueue:
                 mostPopulated = growthQueue.get()
                 #make sure hypRec didn't cover up neighbors placed in growthQueue
                 if not intersects(mostPopulated, [hypRec]): 
@@ -64,8 +60,12 @@ def growRectangles(seeds):
                         hypRec.extendRectangle(mostPopulated)
                         #only add neighbors of mostPopulated if the hypothesis was extended
                         [growthQueue.put(neighbor) for neighbor in neighbors(mostPopulated) if not intersects(neighbor, rectangles)]
-        rectangles.append(hypRec)
+            rectangles.append(hypRec)
+            #insert remaining populated elements in growthQueue into seeds (maybe make seeds a pqueue since we don't remove anything)
     return rectangles
+
+def intersects(rectangle, rectangles):
+    return any([rectangle.intersects(r) for r in rectangles])
 
 def populate(rectangle,population):
     #highly inefficient (can be improved by using two lists of users sorted by lat and lon respectively
@@ -184,7 +184,10 @@ class Rectangle:
         self.width = southEast.lon-northWest.lon
         assert(self.width > 0)
         self.users = []
-
+    def intersects(self, other):
+        return other.contains(self.nw) or other.contains(self.se) or self.contains(other.nw) or self.contains(other.se)
+    def contains(self, coordinate):
+        return coordinate.lat<=rectangle.nw.lat and coordinate.lat>rectangle.se.lat and coordinate.lon <= rectangle.se.lon and coordinate.lon > rectangle.nw.lon
     def __repr__(self):
         return str(self.nw)+","+str(self.se)+" Contains:" + str(len(self.users))
     def __eq__(self, other):

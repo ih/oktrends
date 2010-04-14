@@ -18,6 +18,27 @@ s0=s[0]
 test(start.users)
 print(neighbors(s0))
 
+#intersection test
+r1=Rectangle(Coord(2,0),Coord(0,2))
+r2=Rectangle(Coord(4,1),Coord(1,4))
+r3=Rectangle(Coord(3,2),Coord(2,3))
+r4=Rectangle(Coord(2,1),Coord(1,4))
+#extensionTest
+
+ct=Rectangle(Coord(1,1),Coord(0,2))
+[ct.addUser(u) for u in us]
+nt=Rectangle(Coord(2,1),Coord(1,2))
+nt.extendRectangle(ct)
+st=Rectangle(Coord(0,1),Coord(-1,2))
+[st.addUser(u) for u in us]
+st.extendRectangle(ct)
+
+et=Rectangle(Coord(1,2),Coord(0,3))
+print "test:"+str(et)
+
+#ct.extendRectangle(et)
+et.extendRectangle(ct)
+
 #growRectangles(s)
 #print s
 # p1=Coord(90,0)

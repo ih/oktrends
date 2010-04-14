@@ -1,7 +1,7 @@
 import sys
 from sqlalchemy import create_engine
 from Queue import PriorityQueue
-from copy import copy
+from copy import copy,deepcopy
 import pdb
 
 northLimit=4
@@ -12,7 +12,7 @@ rectangleNum = 2
 
 areaLimit = 2 #square miles
 meshSize = 1 #square miles
-seedLimit = areaLimit/meshSize #the most number of seeds one might need
+seedLimit = rectangleNum*areaLimit/meshSize #the most number of seeds one might need
 allUsers = []
 
 def test(users):
@@ -41,23 +41,24 @@ def preprocess(dbuser,dbpass):
 
 def growRectangles(seeds):
     rectangles = []
-    pdb.set_trace()
     while len(rectangles) < rectangleNum and seeds:
         seed=seeds.pop(0)
+#        pdb.set_trace()
         if not intersects(seed,rectangles):
             # hypRec is the hypothesis rectangle that gets extended to cover the most populated neighboring squares
             hypRec = copy(seed) 
             growthQueue=UniqueRectangleQueue()#change this to clear the queue instead of creating a new one?
             [growthQueue.put(neighbor) for neighbor in neighbors(seed) if not intersects(neighbor, rectangles)]
-             while area(hypRec)<areaLimit and growthQueue:
+            while area(hypRec)<areaLimit and growthQueue:
                 mostPopulated = growthQueue.get()
                 #make sure hypRec didn't cover up neighbors placed in growthQueue
                 if not intersects(mostPopulated, [hypRec]): 
                 #check if extending the hypothesis rectangle would intersect anything in rectangles
-                    testExpand=Rectangle(hypRec.nw,hypRec.se)
+                    testExpand=Rectangle(deepcopy(hypRec.nw),deepcopy(hypRec.se))
                     testExpand.extendRectangle(mostPopulated)
                     if not intersects(testExpand, rectangles):
                         hypRec.extendRectangle(mostPopulated)
+          
                         #only add neighbors of mostPopulated if the hypothesis was extended
                         [growthQueue.put(neighbor) for neighbor in neighbors(mostPopulated) if not intersects(neighbor, rectangles)]
             rectangles.append(hypRec)
@@ -81,33 +82,33 @@ def neighbors(rectangle):
     return ns
 
 def north(rectangle):
-    if rectangle.nw.lat+rectangle.height <= northLimit:
-        nw=Coord(rectangle.nw.lat+rectangle.height, rectangle.nw.lon)
+    if rectangle.nw.lat+rectangle.height() <= northLimit:
+        nw=Coord(rectangle.nw.lat+rectangle.height(), rectangle.nw.lon)
         se=Coord(rectangle.nw.lat, rectangle.se.lon)
         return Rectangle(nw,se)
     else:
         assert rectangle.nw.lat == northLimit
         return rectangle
 def west(rectangle):
-    if rectangle.nw.lon-rectangle.width >= westLimit:
-        nw=Coord(rectangle.nw.lat, rectangle.nw.lon-rectangle.width)
+    if rectangle.nw.lon-rectangle.width() >= westLimit:
+        nw=Coord(rectangle.nw.lat, rectangle.nw.lon-rectangle.width())
         se=Coord(rectangle.se.lat, rectangle.nw.lon)
         return Rectangle(nw,se)
     else:
         assert rectangle.nw.lon == westLimit
         return rectangle
 def east(rectangle):
-    if rectangle.se.lon+rectangle.width <= eastLimit:
+    if rectangle.se.lon+rectangle.width() <= eastLimit:
         nw=Coord(rectangle.nw.lat, rectangle.se.lon)
-        se=Coord(rectangle.se.lat, rectangle.se.lon+rectangle.width)
+        se=Coord(rectangle.se.lat, rectangle.se.lon+rectangle.width())
         return Rectangle(nw,se)
     else:
         assert rectangle.se.lon == eastLimit
         return rectangle 
 def south(rectangle):
-    if rectangle.se.lat-rectangle.height >= southLimit:
+    if rectangle.se.lat-rectangle.height() >= southLimit:
         nw=Coord(rectangle.se.lat, rectangle.nw.lon)
-        se=Coord(rectangle.se.lat-rectangle.height, rectangle.se.lon)
+        se=Coord(rectangle.se.lat-rectangle.height(), rectangle.se.lon)
         return Rectangle(nw,se)
     else:
         assert rectangle.se.lat == southLimit
@@ -179,15 +180,22 @@ class Rectangle:
     def __init__(self, northWest, southEast):
         self.nw = northWest
         self.se = southEast
-        self.height = northWest.lat-southEast.lat
-        assert(self.height > 0)
-        self.width = southEast.lon-northWest.lon
-        assert(self.width > 0)
-        self.users = []
+        self.users = set()
+    def height(self):
+        assert (self.nw.lat-self.se.lat)>0
+        return self.nw.lat-self.se.lat
+    def width(self):
+        assert(self.se.lon-self.nw.lon)>0
+        return self.se.lon-self.nw.lon
     def intersects(self, other):
-        return other.contains(self.nw) or other.contains(self.se) or self.contains(other.nw) or self.contains(other.se)
+#        pdb.set_trace()
+        selfInOther = other.contains(self.nw) or other.contains(self.se) or other.contains(Coord(self.se.lat,self.nw.lon)) or other.contains(Coord(self.nw.lat,self.se.lon))
+        otherInSelf = self.contains(other.nw) or self.contains(other.se) or self.contains(Coord(other.se.lat,other.nw.lon)) or self.contains(Coord(other.nw.lat,other.se.lon))
+        selfCenterInOther = other.contains(Coord(self.nw.lat-self.height()/2.0,self.se.lon-self.width()/2.0))
+        otherCenterInSelf = self.contains(Coord(other.nw.lat-other.height()/2.0,other.se.lon-other.width()/2.0))
+        return selfInOther or otherInSelf or selfCenterInOther or otherCenterInSelf
     def contains(self, coordinate):
-        return coordinate.lat<=rectangle.nw.lat and coordinate.lat>rectangle.se.lat and coordinate.lon <= rectangle.se.lon and coordinate.lon > rectangle.nw.lon
+        return coordinate.lat<self.nw.lat and coordinate.lat>self.se.lat and coordinate.lon <self.se.lon and coordinate.lon > self.nw.lon
     def __repr__(self):
         return str(self.nw)+","+str(self.se)+" Contains:" + str(len(self.users))
     def __eq__(self, other):
@@ -195,10 +203,11 @@ class Rectangle:
     def __hash__(self):
         return hash((self.nw,self.se))
     def addUser(self,user):
-        self.users.append(user)
+        self.users.add(user)
     def popSize(self):
         return len(self.users)
     def extendRectangle(self, expansion):
+        [self.addUser(u) for u in expansion.users]
         #assumes expansion is a rectangle that borders the current rectanlge
         #this can eventually be rewritten to draw diagonal rectangles
         if expansion.nw.lat > self.nw.lat:
@@ -216,7 +225,7 @@ class Rectangle:
 #            assert (self == expansion), (str(self)+' '+str(expansion))
 
 def area(rectangle):
-    return rectangle.height*rectangle.width
+    return rectangle.height()*rectangle.width()
 
 class Coord:
     def __init__(self, lat, lon):
@@ -235,6 +244,10 @@ class User:
         self.pos = Coord(lat=latitude,lon=longitude)
     def __repr__(self):
         return str(self.userid)+":"+str(self.pos)
+    def __eq__(self, other):
+        return self.userid == other.userid
+    def __hash__(self):
+        return hash(self.userid)
 
 #get all data from the database
 # dbuser, dbpass = sys.argv[1],sys.argv[2]

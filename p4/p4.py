@@ -5,10 +5,10 @@ from copy import copy,deepcopy
 import pdb
 
 northLimit=4
-southLimit=0
-eastLimit=5
-westLimit=0
-rectangleNum = 2
+southLimit=-4
+eastLimit=8
+westLimit=-8
+rectangleNum = 5
 
 areaLimit = 2 #square miles
 meshSize = 1 #square miles
@@ -19,14 +19,15 @@ def test(users):
     global allUsers
     allUsers=users
 
-def preprocess(dbuser,dbpass):
-    s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
+def preprocess(dbuser,dbpass,host):
+    s='mysql://'+dbuser+':'+dbpass+'@'+host+'/'+'okcupid'
+#    s='mysql://'+dbuser+':'+dbpass+'@localhost/first'
 #    engine = create_engine('mysql://'+dbuser+':'+dbpass+'+@localhost/first')
     engine = create_engine(s)
     connection=engine.connect()
     data=connection.execute("select * from usr_locations")
     west=Rectangle(Coord(northLimit,westLimit),Coord(southLimit,0))
-    east=Rectangle(Coord(northLimit,0),Coord(southLimit,northLimit))
+    east=Rectangle(Coord(northLimit,0),Coord(southLimit,eastLimit))
     for row in data:
         u=User(row[0],row[1],row[2])
         allUsers.append(u) #change this to insert user into two lists sorted by lat and lon; eventually used in populate
@@ -49,14 +50,17 @@ def growRectangles(seeds):
             hypRec = copy(seed) 
             growthQueue=UniqueRectangleQueue()#change this to clear the queue instead of creating a new one?
             [growthQueue.put(neighbor) for neighbor in neighbors(seed) if not intersects(neighbor, rectangles)]
-            while area(hypRec)<areaLimit and growthQueue:
+            grown=False #flag changes to true once extension attempt surpasses arealimit
+            while not grown and growthQueue:
                 mostPopulated = growthQueue.get()
                 #make sure hypRec didn't cover up neighbors placed in growthQueue
                 if not intersects(mostPopulated, [hypRec]): 
                 #check if extending the hypothesis rectangle would intersect anything in rectangles
                     testExpand=Rectangle(deepcopy(hypRec.nw),deepcopy(hypRec.se))
                     testExpand.extendRectangle(mostPopulated)
-                    if not intersects(testExpand, rectangles):
+                    if area(testExpand) > areaLimit:
+                        grown = True
+                    if not intersects(testExpand, rectangles) and not grown:
                         hypRec.extendRectangle(mostPopulated)
           
                         #only add neighbors of mostPopulated if the hypothesis was extended
@@ -103,7 +107,7 @@ def east(rectangle):
         se=Coord(rectangle.se.lat, rectangle.se.lon+rectangle.width())
         return Rectangle(nw,se)
     else:
-        assert rectangle.se.lon == eastLimit
+#        assert rectangle.se.lon == eastLimit
         return rectangle 
 def south(rectangle):
     if rectangle.se.lat-rectangle.height() >= southLimit:
@@ -111,13 +115,14 @@ def south(rectangle):
         se=Coord(rectangle.se.lat-rectangle.height(), rectangle.se.lon)
         return Rectangle(nw,se)
     else:
-        assert rectangle.se.lat == southLimit
+#        assert rectangle.se.lat == southLimit
         return rectangle
 
 def findSeeds(rectangleQueue):
     """return most populated squares of size dependent on mesh_size"""
     seeds = []
     while len(seeds) < seedLimit and not rectangleQueue.empty():
+#        pdb.set_trace()
         mostPopulated = rectangleQueue.get()
         if area(mostPopulated) <= meshSize:
             seeds.append(mostPopulated)
@@ -249,9 +254,9 @@ class User:
     def __hash__(self):
         return hash(self.userid)
 
-#get all data from the database
-# dbuser, dbpass = sys.argv[1],sys.argv[2]
-# ans = findRectangles(preprocess(dbuser,dbpass))
+# get all data from the database
+# dbuser, dbpass, host = sys.argv[1],sys.argv[2]
+# ans = growRectangles(findSeeds(preprocess(dbuser,dbpass,host)))
 # for r in ans:
 #     print r
 #     for user in r.users:
@@ -259,18 +264,18 @@ class User:
 
 
 
-p1=Coord(100,0)
-p2=Coord(0,100)
-r=Rectangle(p1,p2)
-r.addUser(User(1,5,5))
-r.addUser(User(2,5,60))
-r.addUser(User(3,60,65))
-r.addUser(User(4,63,62))
-r.addUser(User(5,99,5))
-r.addUser(User(6,89,10))
-r.addUser(User(7,76,16))
-rq=RectangleQueue()
-rq.put(r)
+# p1=Coord(100,0)
+# p2=Coord(0,100)
+# r=Rectangle(p1,p2)
+# r.addUser(User(1,5,5))
+# r.addUser(User(2,5,60))
+# r.addUser(User(3,60,65))
+# r.addUser(User(4,63,62))
+# r.addUser(User(5,99,5))
+# r.addUser(User(6,89,10))
+# r.addUser(User(7,76,16))
+# rq=RectangleQueue()
+# rq.put(r)
 
 
 

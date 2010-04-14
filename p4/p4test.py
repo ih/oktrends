@@ -2,42 +2,51 @@ from p4 import *
 import unittest
 from copy import copy
 
+#db test
+p=preprocess("root","password","localhost")
+s=findSeeds(p)
+ans = growRectangles(s)
+for r in ans:
+    print r
+    for user in r.users:
+        print user
+
 #4x4 gridTest
-us=[]
-us.append(User(0,.5,2.5))
-us.append(User(1,.5,1.5))
-us.append(User(2,1.5,1.5))
-us.append(User(3,2.5,.5))
-us.append(User(4,3.5,3.5))
-start=Rectangle(Coord(4,0),Coord(0,4))
-[start.addUser(u) for u in us]
-rq=RectangleQueue()
-rq.put(start)
-s=findSeeds(rq)
-s0=s[0]
-test(start.users)
-print(neighbors(s0))
+# us=[]
+# us.append(User(0,.5,2.5))
+# us.append(User(1,.5,1.5))
+# us.append(User(2,1.5,1.5))
+# us.append(User(3,2.5,.5))
+# us.append(User(4,3.5,3.5))
+# start=Rectangle(Coord(4,0),Coord(0,4))
+# [start.addUser(u) for u in us]
+# rq=RectangleQueue()
+# rq.put(start)
+# s=findSeeds(rq)
+# s0=s[0]
+# test(start.users)
+# print(neighbors(s0))
 
-#intersection test
-r1=Rectangle(Coord(2,0),Coord(0,2))
-r2=Rectangle(Coord(4,1),Coord(1,4))
-r3=Rectangle(Coord(3,2),Coord(2,3))
-r4=Rectangle(Coord(2,1),Coord(1,4))
-#extensionTest
+# #intersection test
+# r1=Rectangle(Coord(2,0),Coord(0,2))
+# r2=Rectangle(Coord(4,1),Coord(1,4))
+# r3=Rectangle(Coord(3,2),Coord(2,3))
+# r4=Rectangle(Coord(2,1),Coord(1,4))
+# #extensionTest
 
-ct=Rectangle(Coord(1,1),Coord(0,2))
-[ct.addUser(u) for u in us]
-nt=Rectangle(Coord(2,1),Coord(1,2))
-nt.extendRectangle(ct)
-st=Rectangle(Coord(0,1),Coord(-1,2))
-[st.addUser(u) for u in us]
-st.extendRectangle(ct)
+# ct=Rectangle(Coord(1,1),Coord(0,2))
+# [ct.addUser(u) for u in us]
+# nt=Rectangle(Coord(2,1),Coord(1,2))
+# nt.extendRectangle(ct)
+# st=Rectangle(Coord(0,1),Coord(-1,2))
+# [st.addUser(u) for u in us]
+# st.extendRectangle(ct)
 
-et=Rectangle(Coord(1,2),Coord(0,3))
-print "test:"+str(et)
+# et=Rectangle(Coord(1,2),Coord(0,3))
+# print "test:"+str(et)
 
-#ct.extendRectangle(et)
-et.extendRectangle(ct)
+# #ct.extendRectangle(et)
+# et.extendRectangle(ct)
 
 #growRectangles(s)
 #print s
